@@ -1,0 +1,23 @@
+gradient descent: 
+w:
+[[ 1.77718897]
+ [-0.22594435]
+ [-0.22101721]]
+Confusion Matrix:
+               predict cluster 1 predict cluster 2
+is cluster 1          42             8
+is cluster 2          16             34
+Sensitivity (successfully predict cluster 1) : 0.7241379310344828
+Specificity (successfully predict cluster 2) : 0.8095238095238095
+----------------------------------------
+newton's method: 
+w:[[ 1.5519086 ]
+ [ 0.14802888]
+ [-0.29930791]]
+Confusion Matrix:
+               predict cluster 1 predict cluster 2
+is cluster 1          44             6
+is cluster 2          19             31
+Sensitivity (successfully predict cluster 1) : 0.6984126984126984
+Specificity (successfully predict cluster 2) : 0.8378378378378378
+----------------------------------------
