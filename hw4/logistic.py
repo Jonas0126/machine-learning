@@ -13,17 +13,23 @@ def update(X, w, Y, flag):
 
     else:
         #e = e^-(wT*X)
-        e = np.exp(np.dot(X,-1 * w))
-        D = e / (np.dot(1+e,1+e.transpose()))
+        D = np.zeros((len(X),len(X)))
+        print(np.shape(D))
+        for i in range(len(D)):
+            e = np.dot(X[i], w)
+            D[i][i] = np.exp(-e) / ((1+np.exp(e))**2)
+        print(D)
+        
+        
         hassian = np.dot(X.transpose(), np.dot(D, X))
     
         try:
-            hassian_inv = hassian.linalg.inv()
-            w = w - np.dot(hassian_inv, gradient) * 0.005
+            hassian_inv = np.linalg.inv(hassian)
+            print(f'hassian_inv = {hassian_inv}')
+            print(f'hassian_inv @ gradient = {hassian_inv @ gradient}')
+            w -= np.dot(hassian_inv, gradient) * 0.001
         except:
             w = w - (gradient * 0.005)
-
-
     return w
 
 def result(w, alldata, name):
@@ -74,7 +80,7 @@ for i in range(n):
 plt.scatter(d1[0],d1[1],c='b')
 plt.scatter(d2[0], d2[1], c='r')
 
-plt.savefig('groundtruth_case1.jpg')
+plt.savefig('groundtruth_case2.jpg')
 
 
 #alldata[0 = x | 1 = y][data]
@@ -108,20 +114,21 @@ count = 0
 while(1):
     w1 = update(X,w,Y, 0)
     print(f'w1 = {w1}')
-    if abs(w1[0] - w[0]) < 0.01 and abs(w1[1] - w[1]) < 0.01 and abs(w1[2] - w[2]) < 0.01:
+    #
+    if abs(w1[0] - w[0]) < 0.001 and abs(w1[1] - w[1]) < 0.001 and abs(w1[2] - w[2]) < 0.001:
         break
     
     w = w1
-    '''
+    
     count += 1
     if(count % 50000 == 0):
         result(w,alldata,'gradient_case2')
     if(count == 200000):
         break
-    '''
+    
 
-TP, FP, FN, TN = result(w,alldata,'gradient_case1')
-f = open('case1.txt', mode = 'w')
+TP, FP, FN, TN = result(w,alldata,'gradient_case2')
+f = open('case2.txt', mode = 'w')
 f.write('gradient descent: \n')
 f.write(f'w:\n{w}\n')
 
@@ -136,25 +143,27 @@ f.write(f'Specificity (successfully predict cluster 2) : {TN/(TN+FP)}\n')
 f.write('----------------------------------------\n')
 
 
-#inttial w = [1, 1, 1]^T
-w = np.ones((3,1))
+#inttial w = [0, 0, 0]^T
+w = np.zeros((3,1))
+
 
 while(1):
     w1 = update(X,w,Y, 1)
     print(f'w1 = {w1}')
-    if abs(w1[0] - w[0]) < 0.1 and abs(w1[1] - w[1]) < 0.1 and abs(w1[2] - w[2]) < 0.1:
+    if abs(w1[0] - w[0]) < 0.001 and abs(w1[1] - w[1]) < 0.001 and abs(w1[2] - w[2]) < 0.001:
         break
     
     w = w1
-    '''
+
+    
     count += 1
     if(count % 50000 == 0):
         result(w,alldata,'gradient_case2')
     if(count == 200000):
         break
-    '''
+    
 
-TP, FP, FN, TN = result(w,alldata,'newton_case1')
+TP, FP, FN, TN = result(w,alldata,'newton_case2')
 f.write('newton\'s method: \n')
 f.write(f'w:{w}\n')
 
