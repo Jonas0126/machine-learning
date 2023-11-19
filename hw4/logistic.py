@@ -80,7 +80,7 @@ for i in range(n):
 plt.scatter(d1[0],d1[1],c='b')
 plt.scatter(d2[0], d2[1], c='r')
 
-plt.savefig('groundtruth_case2.jpg')
+plt.savefig('groundtruth_case1.jpg')
 
 
 #alldata[0 = x | 1 = y][data]
@@ -119,16 +119,16 @@ while(1):
         break
     
     w = w1
-    
+    '''
     count += 1
     if(count % 50000 == 0):
         result(w,alldata,'gradient_case2')
     if(count == 200000):
         break
-    
+    '''
 
-TP, FP, FN, TN = result(w,alldata,'gradient_case2')
-f = open('case2.txt', mode = 'w')
+TP, FP, FN, TN = result(w,alldata,'gradient_case1')
+f = open('case1.txt', mode = 'w')
 f.write('gradient descent: \n')
 f.write(f'w:\n{w}\n')
 
@@ -155,15 +155,15 @@ while(1):
     
     w = w1
 
-    
+    '''
     count += 1
     if(count % 50000 == 0):
         result(w,alldata,'gradient_case2')
     if(count == 200000):
         break
-    
+    '''
 
-TP, FP, FN, TN = result(w,alldata,'newton_case2')
+TP, FP, FN, TN = result(w,alldata,'newton_case1')
 f.write('newton\'s method: \n')
 f.write(f'w:{w}\n')
 
