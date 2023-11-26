@@ -1,0 +1,6 @@
+Parameter C : 0.001, acc : 95.4
+Parameter C : 0.01778279410038923, acc : 97.06
+Parameter C : 0.31622776601683794, acc : 96.6
+Parameter C : 5.623413251903491, acc : 96.32
+Parameter C : 100.0, acc : 96.22
+best parameter C : 0.01778279410038923, acc : 97.06

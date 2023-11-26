@@ -1,0 +1,3 @@
+acc of linear kernel : (95.08, 0.1404, 0.931149802516624)
+acc of polynomial kernel : (34.68, 2.6212, 0.14887572191533946)
+acc of rbf kernel : (95.32, 0.1492, 0.9271864783823697)
