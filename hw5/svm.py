@@ -92,19 +92,19 @@ f.write(f'acc of rbf kernel : {p_acc}\n')
 
 
 #soft svm
-'''
+
 grid = {'C':np.logspace(-3,2,5), 'gamma': np.logspace(-3,2,5), 'coef0':np.logspace(-3,2,4), 'degree':[1,2,3]}
 
 optParameter = grid_search(x_train,y_train,grid, 'softpolynomial')
 
-softlinear = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'] + ' -g' + optParameter['gamma'] + ' -r' + optParameter['coef0'])
+softlinear = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'] + ' -g ' + optParameter['gamma'] + ' -r ' + optParameter['coef0'])
 
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softlinear)
 temp = optParameter['C']
 print(f'opt parameter : {optParameter}')
 print(f'acc of linear kernel : {p_acc}')
-'''
 
+'''
 #linear kernel + rbf kernel
 x_train = np.array(x_train)
 linearkernel = x_train @ x_train.T
@@ -130,3 +130,4 @@ x_test = np.insert(x_test, 0, idx, axis=1)
 f = open('combinekernel.txt', 'w')
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, combineModel)
 f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
+'''
