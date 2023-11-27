@@ -136,7 +136,7 @@ temp = optParameter['C']
 print(f'opt parameter : {optParameter}')
 print(f'acc of linear kernel : {p_acc}')
 '''
-grid = {'gamma':np.logspace(-3,3,100)}
+grid = {'gamma':np.logspace(-5,3,100)}
 
 '''
 #linear kernel + rbf kernel
