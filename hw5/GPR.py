@@ -69,13 +69,14 @@ x = np.array(x)
 y = np.array(y)
 x_ = np.linspace(-60, 60, 500)
 
-
+#task 1
 mu, var = predict(x,x_,y,a,l)
 drawLine(x, x_, y, mu,var)
 
+
+#task 2
 bestPar = minimize(logLikelihood, [a, l], bounds=((1e-5,1e5), (1e-5, 1e5)), args=(x, y))
 a = bestPar.x[0]
 l = bestPar.x[1]
-print(f'l = {l}')
 mu, var = predict(x,x_,y,a,l)
 drawLine(x, x_, y, mu,var)

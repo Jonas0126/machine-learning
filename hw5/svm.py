@@ -67,6 +67,23 @@ def grid_search(x_train, y_train, grid, model):
         f.write(f'best parameter C : {c}, best parameter gamma : {g}, best parameter coef : {r}, acc : {best}\n')
         return opt
     
+    elif model == 'softrbf':
+        f = open(model+'.txt', 'w')
+        
+        best = 0
+        for i in grid['C']:
+            for j in grid['gamma']:
+                parameter = '-t 2 -s 0 -v 5 -c ' + str(i) + ' -g ' + str(j)
+                accuracy = svm_train(y_train, x_train, parameter)
+                f.write(f'Parameter C : {i}, Parameter gamma : {j}, acc : {accuracy}\n')
+                if accuracy > best:
+                    best = accuracy
+                    opt['C'] = str(i)
+                    opt['gamma'] = str(j)
+        c = opt['C']
+        g = opt['gamma']
+        f.write(f'Parameter C : {c}, Parameter gamma : {g}, acc : {best}\n')
+        return opt
 #Data process
 x_train, y_train, x_test, y_test = loadData()
 y_train = y_train.reshape(-1).tolist()
@@ -87,7 +104,7 @@ p_labs, p_acc, p_vals = svm_predict(y_test, x_test, polynomialModel)
 f.write(f'acc of polynomial kernel : {p_acc}\n')
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, rbfModel)
 f.write(f'acc of rbf kernel : {p_acc}\n')
-'''
+
 
 
 
@@ -95,14 +112,31 @@ f.write(f'acc of rbf kernel : {p_acc}\n')
 
 grid = {'C':np.logspace(-3,2,5), 'gamma': np.logspace(-3,2,5), 'coef0':np.logspace(-3,2,4), 'degree':[1,2,3]}
 
+#grid search linear
+optParameter = grid_search(x_train,y_train,grid, 'softlinear')
+
+softlinear = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'])
+
+
+#grid search polynomial
 optParameter = grid_search(x_train,y_train,grid, 'softpolynomial')
 
-softlinear = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'] + ' -g ' + optParameter['gamma'] + ' -r ' + optParameter['coef0'])
+softpolynomial = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'] 
+                       + ' -g ' + optParameter['gamma'] 
+                       + ' -r ' + optParameter['coef0'])
 
-p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softlinear)
+#grid search rbf
+optParameter = grid_search(x_train,y_train,grid, 'softrbf')
+
+softrbf = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'] 
+                       + ' -g ' + optParameter['gamma'])
+
+p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softpolynomial)
 temp = optParameter['C']
 print(f'opt parameter : {optParameter}')
 print(f'acc of linear kernel : {p_acc}')
+'''
+grid = {'gamma':np.logspace(-3,3,100)}
 
 '''
 #linear kernel + rbf kernel
@@ -111,7 +145,7 @@ linearkernel = x_train @ x_train.T
 
 #radial basis function: exp(-gamma*|u-v|^2),gamma : set gamma in kernel function (default 1/num_features)
 dist = cdist(x_train, x_train, 'sqeuclidean')
-rbfkernel = np.exp((-0.378599) * dist)
+rbfkernel = np.exp((1/numBit) * dist)
 x_train = linearkernel+rbfkernel
 idx = np.arange(len(x_train))+1
 x_train = np.insert(x_train, 0, idx, axis=1)
@@ -122,7 +156,7 @@ combineModel = svm_train(y_train, x_train, '-t 4')
 x_test = np.array(x_test)
 linearkernel = x_test @ x_test.T
 dist = cdist(x_test, x_test, 'sqeuclidean')
-rbfkernel = np.exp((-0.378599) * dist)
+rbfkernel = np.exp((1/numBit) * dist)
 x_test = linearkernel+rbfkernel
 idx = np.arange(len(x_test))+1
 x_test = np.insert(x_test, 0, idx, axis=1)
@@ -131,3 +165,36 @@ f = open('combinekernel.txt', 'w')
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, combineModel)
 f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
 '''
+
+
+f = open('combinekernel.txt', 'w')
+for i in grid['gamma']:
+    #linear kernel + rbf kernel
+    x = np.array(x_train).copy()
+    linearkernel = x @ x.T
+
+    #radial basis function: exp(-gamma*|u-v|^2),gamma : set gamma in kernel function (default 1/num_features)
+    dist = cdist(x, x, 'sqeuclidean')
+    rbfkernel = np.exp((i) * dist)
+    x = linearkernel+rbfkernel
+    idx = np.arange(len(x))+1
+    x = np.insert(x, 0, idx, axis=1)
+
+    combineModel = svm_train(y_train, x, '-t 4')
+
+
+    x = np.array(x_test).copy()
+    linearkernel = x @ x.T
+    dist = cdist(x, x, 'sqeuclidean')
+    rbfkernel = np.exp((i) * dist)
+    x = linearkernel+rbfkernel
+    idx = np.arange(len(x))+1
+    x = np.insert(x, 0, idx, axis=1)
+
+    
+    p_labs, p_acc, p_vals = svm_predict(y_test, x, combineModel)
+    f.write(f'gamma : {i}\n')
+    f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
+    f.write(f'-------------------------------------------------\n')
+
+
