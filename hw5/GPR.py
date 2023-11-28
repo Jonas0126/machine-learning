@@ -62,7 +62,6 @@ def logLikelihood(par, x, y):
 a = 1
 l = 1
 b = 1/5
-v = 1
 
 x, y = loadData()
 x = np.array(x)
@@ -73,10 +72,12 @@ x_ = np.linspace(-60, 60, 500)
 mu, var = predict(x,x_,y,a,l)
 drawLine(x, x_, y, mu,var)
 
-
+f = open('gpr_bestparameter.txt', 'w')
 #task 2
 bestPar = minimize(logLikelihood, [a, l], bounds=((1e-5,1e5), (1e-5, 1e5)), args=(x, y))
 a = bestPar.x[0]
 l = bestPar.x[1]
+f.write(f'best a : {a}\n')
+f.write(f'best l : {l}')
 mu, var = predict(x,x_,y,a,l)
 drawLine(x, x_, y, mu,var)
