@@ -136,7 +136,7 @@ temp = optParameter['C']
 print(f'opt parameter : {optParameter}')
 print(f'acc of linear kernel : {p_acc}')
 '''
-grid = {'gamma':np.logspace(-5,3,100)}
+grid = {'gamma':np.logspace(-7,1,1000)}
 
 '''
 #linear kernel + rbf kernel
@@ -168,6 +168,7 @@ f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
 
 
 f = open('combinekernel.txt', 'w')
+
 for i in grid['gamma']:
     #linear kernel + rbf kernel
     x = np.array(x_train).copy()
