@@ -40,6 +40,7 @@ def grid_search(x_train, y_train, grid, model):
                 opt['C'] = str(i)
         temp = opt['C']
         f.write(f'best parameter C : {temp}, acc : {best}\n')
+        f.close()
         return opt
     
     elif model == 'softpolynomial':
@@ -65,6 +66,7 @@ def grid_search(x_train, y_train, grid, model):
         g = opt['gamma']
         r = opt['coef0']
         f.write(f'best parameter C : {c}, best parameter gamma : {g}, best parameter coef : {r}, acc : {best}\n')
+        f.close()
         return opt
     
     elif model == 'softrbf':
@@ -83,6 +85,7 @@ def grid_search(x_train, y_train, grid, model):
         c = opt['C']
         g = opt['gamma']
         f.write(f'Parameter C : {c}, Parameter gamma : {g}, acc : {best}\n')
+        f.close()
         return opt
 #Data process
 x_train, y_train, x_test, y_test = loadData()
@@ -103,11 +106,11 @@ f.write(f'acc of linear kernel : {p_acc}\n')
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, polynomialModel)
 f.write(f'acc of polynomial kernel : {p_acc}\n')
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, rbfModel)
+print(f'acc :{p_acc[0]}, mse : {p_acc[1]}')
 f.write(f'acc of rbf kernel : {p_acc}\n')
+'''
 
-
-
-
+'''
 #soft svm
 
 grid = {'C':np.logspace(-3,2,5), 'gamma': np.logspace(-3,2,5), 'coef0':np.logspace(-3,2,4), 'degree':[1,2,3]}
@@ -116,7 +119,10 @@ grid = {'C':np.logspace(-3,2,5), 'gamma': np.logspace(-3,2,5), 'coef0':np.logspa
 optParameter = grid_search(x_train,y_train,grid, 'softlinear')
 
 softlinear = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'])
-
+p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softlinear)
+f = open('softlinear.txt', 'a')
+f.write(f'opt parameter : {optParameter}\n')
+f.write(f'acc of linear kernel : {p_acc}\n')
 
 #grid search polynomial
 optParameter = grid_search(x_train,y_train,grid, 'softpolynomial')
@@ -125,50 +131,31 @@ softpolynomial = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C']
                        + ' -g ' + optParameter['gamma'] 
                        + ' -r ' + optParameter['coef0'])
 
+p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softpolynomial)
+f = open('softpolynomial.txt', 'a')
+f.write(f'opt parameter : {optParameter}\n')
+f.write(f'acc of polynomial kernel : {p_acc}\n')
+
+
+
 #grid search rbf
 optParameter = grid_search(x_train,y_train,grid, 'softrbf')
 
 softrbf = svm_train(y_train, x_train, '-t 0 -s 0 -c '+ optParameter['C'] 
                        + ' -g ' + optParameter['gamma'])
 
-p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softpolynomial)
-temp = optParameter['C']
-print(f'opt parameter : {optParameter}')
-print(f'acc of linear kernel : {p_acc}')
+p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softrbf)
+f = open('softrbf.txt', 'a')
+f.write(f'opt parameter : {optParameter}\n')
+f.write(f'acc of rbf kernel : {p_acc}\n')
 '''
+
+
 grid = {'gamma':np.logspace(-7,1,1000)}
 
-'''
-#linear kernel + rbf kernel
-x_train = np.array(x_train)
-linearkernel = x_train @ x_train.T
-
-#radial basis function: exp(-gamma*|u-v|^2),gamma : set gamma in kernel function (default 1/num_features)
-dist = cdist(x_train, x_train, 'sqeuclidean')
-rbfkernel = np.exp((1/numBit) * dist)
-x_train = linearkernel+rbfkernel
-idx = np.arange(len(x_train))+1
-x_train = np.insert(x_train, 0, idx, axis=1)
-
-combineModel = svm_train(y_train, x_train, '-t 4')
-
-
-x_test = np.array(x_test)
-linearkernel = x_test @ x_test.T
-dist = cdist(x_test, x_test, 'sqeuclidean')
-rbfkernel = np.exp((1/numBit) * dist)
-x_test = linearkernel+rbfkernel
-idx = np.arange(len(x_test))+1
-x_test = np.insert(x_test, 0, idx, axis=1)
-
 f = open('combinekernel.txt', 'w')
-p_labs, p_acc, p_vals = svm_predict(y_test, x_test, combineModel)
-f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
-'''
-
-
-f = open('combinekernel.txt', 'w')
-
+best = 0
+opt = 0
 for i in grid['gamma']:
     #linear kernel + rbf kernel
     x = np.array(x_train).copy()
@@ -194,8 +181,12 @@ for i in grid['gamma']:
 
     
     p_labs, p_acc, p_vals = svm_predict(y_test, x, combineModel)
+    if best < p_acc[0]:
+        best = p_acc[0]
+        opt = i
     f.write(f'gamma : {i}\n')
     f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
     f.write(f'-------------------------------------------------\n')
-
+f.write(f'best gamma : {opt}\n')
+f.write(f'acc : {best}')
 
