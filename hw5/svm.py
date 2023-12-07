@@ -108,9 +108,9 @@ f.write(f'acc of polynomial kernel : {p_acc}\n')
 p_labs, p_acc, p_vals = svm_predict(y_test, x_test, rbfModel)
 print(f'acc :{p_acc[0]}, mse : {p_acc[1]}')
 f.write(f'acc of rbf kernel : {p_acc}\n')
-'''
 
-'''
+
+
 #soft svm
 
 grid = {'C':np.logspace(-3,2,5), 'gamma': np.logspace(-3,2,5), 'coef0':np.logspace(-3,2,4), 'degree':[1,2,3]}
@@ -148,45 +148,41 @@ p_labs, p_acc, p_vals = svm_predict(y_test, x_test, softrbf)
 f = open('softrbf.txt', 'a')
 f.write(f'opt parameter : {optParameter}\n')
 f.write(f'acc of rbf kernel : {p_acc}\n')
+
+
 '''
 
 
-grid = {'gamma':np.logspace(-7,1,1000)}
-
-f = open('combinekernel.txt', 'w')
+f = open('combinekernel2222.txt', 'w')
 best = 0
 opt = 0
-for i in grid['gamma']:
-    #linear kernel + rbf kernel
-    x = np.array(x_train).copy()
-    linearkernel = x @ x.T
 
-    #radial basis function: exp(-gamma*|u-v|^2),gamma : set gamma in kernel function (default 1/num_features)
-    dist = cdist(x, x, 'sqeuclidean')
-    rbfkernel = np.exp((i) * dist)
-    x = linearkernel+rbfkernel
-    idx = np.arange(len(x))+1
-    x = np.insert(x, 0, idx, axis=1)
+#linear kernel + rbf kernel
+x = np.array(x_train).copy()
+linearkernel = x @ x.T
 
-    combineModel = svm_train(y_train, x, '-t 4')
+#radial basis function: exp(-gamma*|u-v|^2),gamma : set gamma in kernel function (default 1/num_features)
+dist = cdist(x, x, 'sqeuclidean')
+rbfkernel = np.exp(-0.1 * dist)
+x = linearkernel+rbfkernel
+idx = np.arange(len(x))+1
+x = np.insert(x, 0, idx, axis=1)
+
+combineModel = svm_train(y_train, x, '-t 4')
 
 
-    x = np.array(x_test).copy()
-    linearkernel = x @ x.T
-    dist = cdist(x, x, 'sqeuclidean')
-    rbfkernel = np.exp((i) * dist)
-    x = linearkernel+rbfkernel
-    idx = np.arange(len(x))+1
-    x = np.insert(x, 0, idx, axis=1)
+x = np.array(x_test).copy()
+linearkernel = x_test @ np.array(x_train).T
+dist = cdist(x_test, np.array(x_train), 'sqeuclidean')
+rbfkernel = np.exp(-0.1 * dist)
+x = linearkernel+rbfkernel
+idx = np.arange(len(x))+1
+x = np.insert(x, 0, idx, axis=1)
 
     
-    p_labs, p_acc, p_vals = svm_predict(y_test, x, combineModel)
-    if best < p_acc[0]:
-        best = p_acc[0]
-        opt = i
-    f.write(f'gamma : {i}\n')
-    f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
-    f.write(f'-------------------------------------------------\n')
-f.write(f'best gamma : {opt}\n')
-f.write(f'acc : {best}')
+p_labs, p_acc, p_vals = svm_predict(y_test, x, combineModel)
+
+f.write(f'gamma : -0.1\n')
+f.write(f'acc of linear kernel + rbf kernel: {p_acc}\n')
+
 
