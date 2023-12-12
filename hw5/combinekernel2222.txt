@@ -1,0 +1,2 @@
+gamma : -0.1
+acc of linear kernel + rbf kernel: (95.64, 0.118, 0.9418817421775064)
