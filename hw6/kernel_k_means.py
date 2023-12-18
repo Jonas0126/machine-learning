@@ -53,11 +53,13 @@ def gram_matrix(data):
 
 
 
-def initial(data, mode):
+def initial(data, mode, M):
     indicator = np.zeros((group, img_size*img_size))
-    num_cluster = np.zeros(2)
+    num_cluster = np.zeros(group)
+
+    #random
     if mode == 0:
-        #initialze centers
+        
         temp = np.arange(img_size*img_size)
         idx = np.random.choice(temp, size=group, replace=False)
         means = np.zeros((group, 5))
@@ -65,6 +67,46 @@ def initial(data, mode):
             means[i] = data[idx[i]]
             indicator[i][idx[i]] = 1
         num_cluster = np.sum(indicator, axis=1)
+    
+    #k means++
+    elif mode == 1:
+        temp = np.arange(img_size*img_size)
+        idx = np.random.choice(temp, size=1, replace=False)
+        means = np.zeros((group, 5))
+        means[0] = data[idx[0]]
+        indicator[0][idx[0]] = 1
+        min_D = np.ones(img_size*img_size) 
+
+        #dist between means and point
+        for i in range(1 ,group):
+            prob = np.zeros(img_size*img_size)
+            for j in range(img_size*img_size):
+                means_idx = int(means[i-1][0]*img_size + means[i-1][1])
+                
+                D = M[j][j] - 2 * M[j][means_idx] + M[means_idx][means_idx]
+                print(f'D = {D}, min_D[j] = {min_D[j]}')
+                if D < min_D[j]:
+                    min_D[j] = D
+            print(f'min_D = {min_D}')
+            min_D = min_D ** 2
+            print(f'min_D = {min_D}')
+            prob = min_D / np.sum(min_D)
+            print(f'prob = {prob}')
+            sum = 0
+            for j in range(len(prob)):
+                prob[j] += sum
+                sum = prob[j]
+
+            rand = np.random.rand()
+            for j in range(len(prob)):
+                if rand <= prob[j]:
+                    means[i] = data[j]
+                    indicator[i][j] = 1
+                    break
+        num_cluster = np.sum(indicator, axis=1)
+
+    print(f'means = {means}')
+
     return indicator, num_cluster  
 
 #calculate dist between k centers
@@ -105,14 +147,14 @@ def color_assign(indicator):
 
 def kernel_k_means(data, path):
     M = gram_matrix(data)
-    indicator, num_cluster = initial(data, 0)
+    indicator, num_cluster = initial(data, 1, M)
     num = 0
     while 1:
         print(f'num = {num}')
         d = dist(num_cluster, indicator, M)
         indicator = np.zeros((group, img_size*img_size))
         pre_num = num_cluster.copy()
-        for i in tqdm(range(img_size*img_size)):
+        for i in tqdm(range(img_size*img_size), dynamic_ncols=True):
             min = d[0][i]
             min_group = 0
             for j in range(1, group):
@@ -141,7 +183,7 @@ imgidx = 1
 
 for group in range(2,6):
     for imgidx in range(1,3):
-        path = f'kernel_kmeans_img{imgidx}_cluster{group}'
+        path = f'kernel_kmeans_img{imgidx}_cluster{group}_mode_1'
 
         if not os.path.isdir(path):
             os.mkdir(path)
