@@ -9,6 +9,7 @@ img_num = 11
 k = 25
 width = 195
 height = 231
+gamma=1e-8
 subject = ['centerlight', 'glasses', 'happy', 'leftlight',
             'noglasses', 'normal', 'rightlight', 'sad',
             'sleepy', 'surprised', 'wink']
@@ -50,24 +51,26 @@ def pca(M):
     #M = M-mu
     cov = (M-mu) @ (M-mu).T
     eigenvalue, eigenvector = np.linalg.eig(cov)
-    print(eigenvector.shape)
-    for i in range(len(eigenvector[0])):
-        eigenvector[:,i] = eigenvector[:,i] / np.linalg.norm(eigenvector[:,i])
+    eigenface = M.T@eigenvector
+    print(eigenface.shape)
+    for i in range(len(eigenface[0])):
+        eigenface[:,i] = eigenface[:,i] / np.linalg.norm(eigenface[:,i])
     eigenvalue_idx = np.argsort(-eigenvalue)
     U = []
     for i in range(0, k):
-        U.append(eigenvector[:,eigenvalue_idx[i]].real)
+        U.append(eigenface[:,eigenvalue_idx[i]].real)
 
     return np.array(U), mu
 
-def eigenface(eigenvector, data, file):
-    eigenface = eigenvector@data
-    for i in range(len(eigenvector)):
+def eigenface(eigenvector, file):
+    
+    for i in range(k):
         img = np.zeros((height, width))
         for j in range(height):
             for r in range(width):
-                img[j][r] = eigenface[i][j*width+r]
+                img[j][r] = eigenvector[i][j*width+r]
         plt.imsave(f'{file}/eigenface_{i}.jpg', img, cmap='gray')
+
 
 def imageCompression(data, S):
     d = np.zeros((len(data), height//S, width//S))
@@ -119,18 +122,58 @@ def lda(M):
     return U, mu
 
 
+def reconstructFace(M, mean, data, file, S=1):
+
+    sel = np.random.choice(sub_num * 9, 10, replace=False)
+
+    for i in sel:
+        x = data[i].reshape(1, -1)
+        
+        print(f'x shape = {x.shape}')
+        print(f'mean shape = {mean.shape}')
+        print(f'M shape = {M.shape}')
+        reconstruct = (x - mean) @ M @ M.T + mean
+
+ 
+        plt.imsave(f'{file}/reconstruct_{i}.jpg', reconstruct.reshape(height//S, width//S), cmap='gray')
+
+
+
+
+
+def linearKernel(x, x_):
+    return x @ x_.T
+
+def rbfKernel(x, x_):
+    K = np.zeros((len(x), len(x_)))
+    for i in range(len(x)):
+        for j in range(len(x_)):
+            K[i][j] = np.exp(-gamma * np.sum((x[i] - x_[j]) ** 2))
+    return K
+
+
+
+
+#read pgm
 train, test = readData()
 print(train.shape)
-eigenvector, mu = pca(train)
-print(eigenvector.shape)
-print(mu.shape)
-eigenface(eigenvector, train, 'pca_eigenface/')
-data = imageCompression(train,3)
-eigenvector, mu = lda(data)
-print(eigenvector.shape)
-eigenface_lda(eigenvector, 'lda_eigenface/')
+mode = 1
+if mode == 0: 
+    #pca
+    eigenface, mu = pca(train)
+    print(f'e_shape = {eigenface.shape}')
 
-print(mu.shape)
+    eigenface(eigenface, 'pca_eigenface/')
+    reconstructFace(eigenface.T, mu, train, 'pca_reconstruct/')
+
+if mode == 1:
+    #lda
+    data = imageCompression(train,3)
+    eigenvector, mu = lda(data)
+    print(f'e_shape = {eigenvector.shape}')
+    #eigenface_lda(eigenvector, 'lda_eigenface/')
+    #reconstructFace(eigenvector, mu, train, 'pca_reconstruct/', S=3)
+    print(mu)
 
 
 
